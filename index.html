@@ -1,42 +1,75 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Background Remover</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Remove Background & Enhance Image</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin: 50px;
+    }
+    .upload-container {
+      border: 2px dashed #ccc;
+      padding: 20px;
+      margin: 20px auto;
+      width: 300px;
+      cursor: pointer;
+    }
+    #result-image {
+      margin-top: 20px;
+      max-width: 100%;
+    }
+    button {
+      padding: 10px 20px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+  </style>
 </head>
 <body>
-    <h1>Upload Image to Remove Background</h1>
-    <input type="file" id="imageInput" accept="image/*">
-    <button onclick="processImage()">Process Image</button>
-    <img id="outputImage" src="" alt="Processed Image" style="display:none;">
-    <a id="downloadLink" style="display:none;">Download Processed Image</a>
+  <h1>Remove Background & Enhance Image</h1>
+  <div class="upload-container" onclick="document.getElementById('file-input').click()">
+    <p>Click to upload an image</p>
+    <input type="file" id="file-input" accept="image/*" style="display: none;">
+  </div>
+  <button onclick="removeBackground()">Remove Background</button>
+  <div id="result">
+    <img id="result-image" src="" alt="Processed Image">
+  </div>
 
-    <script>
-        async function processImage() {
-            const file = document.getElementById('imageInput').files[0];
-            if (!file) return;
+  <script>
+    async function removeBackground() {
+      const fileInput = document.getElementById('file-input');
+      const file = fileInput.files[0];
 
-            const formData = new FormData();
-            formData.append('image', file);
+      if (!file) {
+        alert('Please upload an image first.');
+        return;
+      }
 
-            const response = await fetch('/process', {
-                method: 'POST',
-                body: formData
-            });
+      const formData = new FormData();
+      formData.append('file', file);
 
-            if (response.ok) {
-                const blob = await response.blob();
-                const url = URL.createObjectURL(blob);
-                document.getElementById('outputImage').src = url;
-                document.getElementById('outputImage').style.display = 'block';
-                document.getElementById('downloadLink').href = url;
-                document.getElementById('downloadLink').download = 'processed_image.png';
-                document.getElementById('downloadLink').style.display = 'block';
-            } else {
-                alert('Error processing image');
-            }
-        }
-    </script>
+      const response = await fetch('/remove-background', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (response.ok) {
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+        document.getElementById('result-image').src = url;
+      } else {
+        alert('Error processing image. Please try again.');
+      }
+    }
+  </script>
 </body>
 </html>
